@@ -1,0 +1,7 @@
+*.gpkg*
+.vscode
+**/node_modules/
+**/.cache
+**/dist
+TODO.md
+data/
