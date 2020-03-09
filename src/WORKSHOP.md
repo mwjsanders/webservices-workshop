@@ -2,71 +2,189 @@
 header-includes: 
 - <script type="text/javascript" src="http://livejs.com/live.js"></script>
 - <style>.caption{font-style:italic;}</style>
+- <link href="https://www.pdok.nl/o/iv-pdok-theme/images/favicon.ico" rel="icon" />
 ---
 
-# PDOK Webservices Workshop
+<!-- TITLE: PDOK Webservices Workshop -->
+
+<div style="background-color:#1A1E4F;padding:1em; border-radius: 3px;">
+[![PDOK Logo](images/pdok_logo.png "PDOK Logo")](https://pdok.nl)
+</div>
+
 <!-- TOC -->
-- [PDOK Webservices Workshop](#pdok-webservices-workshop)
-    - [Introduction](#introduction)
-        - [PDOK webservices](#pdok-webservices)
-        - [SDI NL](#sdi-nl)
-        - [Standards- OGC - Geonovum](#standards--ogc---geonovum)
-        - [Findability / metadata / NGR](#findability--metadata--ngr)
-    - [Focus on map services](#focus-on-map-services)
-        - [WMS](#wms)
-        - [Tiled WMS](#tiled-wms)
-        - [Vector Tiles](#vector-tiles)
-- [Workshop](#workshop)
-    - [1. Setting up NPM project with OpenLayers](#1-setting-up-npm-project-with-openlayers)
-    - [2. Adding base map to viewer](#2-adding-base-map-to-viewer)
-    - [3. Adding WMS to viewer](#3-adding-wms-to-viewer)
-        - [3.1 Adding WMS layer to viewer](#31-adding-wms-layer-to-viewer)
-        - [3.2 Adding featureinfo on click to viewer](#32-adding-featureinfo-on-click-to-viewer)
-    - [4. Adding a GeoJSON layer to your map](#4-adding-a-geojson-layer-to-your-map)
-        - [4.1 Preprocessing the data](#41-preprocessing-the-data)
-        - [4.2 Add a GeoJSON layer to the map](#42-add-a-geojson-layer-to-the-map)
-    - [5. Using the PDOK Location Server](#5-using-the-pdok-location-server)
-- [Referenties](#referenties)
+
+- [1. Introduction](#1-introduction)
+- [2. About PDOK](#2-about-pdok)
+    - [2.1. OGC Web Services (OWS)](#21-ogc-web-services-ows)
+    - [2.2. Web Map Service (WMS)](#22-web-map-service-wms)
+    - [2.3. Web Map Tile Service (WMTS)](#23-web-map-tile-service-wmts)
+    - [2.4. Web Feature Service (WFS)](#24-web-feature-service-wfs)
+    - [2.5. Nationaalgeoregister and Catalogue Service for the Web (CSW)](#25-nationaalgeoregister-and-catalogue-service-for-the-web-csw)
+- [3. Workshop](#3-workshop)
+    - [3.1. Setting up NPM Project with OpenLayers](#31-setting-up-npm-project-with-openlayers)
+    - [3.2. Adding Base Map](#32-adding-base-map)
+    - [3.3. Adding WMS to Viewer](#33-adding-wms-to-viewer)
+        - [3.3.1. Adding WMS Layer to Viewer](#331-adding-wms-layer-to-viewer)
+        - [3.3.2. Adding Featureinfo on Click to Viewer](#332-adding-featureinfo-on-click-to-viewer)
+    - [3.4. Adding a GeoJSON Layer](#34-adding-a-geojson-layer)
+        - [3.4.1. Data Preprocessing](#341-data-preprocessing)
+        - [3.4.2. Adding GeoJSON as a Layer](#342-adding-geojson-as-a-layer)
+    - [3.5. Using the PDOK Location Server](#35-using-the-pdok-location-server)
+        - [3.5.1. Adding Custom Control](#351-adding-custom-control)
+        - [3.5.2. Get Suggestions from Locatie Server](#352-get-suggestions-from-locatie-server)
+        - [3.5.3. Get Result from Locatie Server](#353-get-result-from-locatie-server)
+- [4. Referenties](#4-referenties)
 
 <!-- /TOC -->
 
+<a id="markdown-1-introduction" name="1-introduction"></a>
 
+## 1. Introduction
 
-## Introduction
+In this workshop you will build a web application with an interactive map using the PDOK (map) services. The web application is build with OpenLayers version 6.2.1, an Open Source Javascript library. 
 
-In this workshop you will build a dynamic map on a web page displaying the PDOK geo-webservices. The web application is build with OpenLayers version 6.2.1, an Open Source Javascript library. 
+While building the webapplication you will learn the difference between the different (geo) service types PDOK is providing, such as WMS, WMTS, WFS and WCS. 
 
 https://www.dropbox.com/sh/6j3e40thy9pspoi/AACS2NCHaT0h8JbKLTDSpZx9a?dl=0
 
-### PDOK webservices
 
-- Explain what PDOK is. 
-- Explain what services we provide
-
-### SDI NL
-
-### Standards- OGC - Geonovum
-
-### Findability / metadata / NGR
-
-## Focus on map services
-
-Explain differences between data en map services. Explain focus on Map services
-
-### WMS
-
-### Tiled WMS
-
-### Vector Tiles 
+> NOTE: All created applications in this workshop will use the cartographic projection [*Web Mercator*](https://en.wikipedia.org/wiki/Web_Mercator_projection) `EPSG:3857`. This is the de facto standard in map projections for web mapping applications. Governmental organisations in the Netherlands often require the use of the [*Amersfoort/RD New*](https://nl.wikipedia.org/wiki/Rijksdriehoeksco%C3%B6rdinaten) `EPSG:28992` projection, some the map services of PDOK are only available in the *Amersfoort/RD New* projection. More information about map projections can be found on [Wikipedia](https://en.wikipedia.org/wiki/Map_projection).
 
 
-# Workshop
+<a id="markdown-2-about-pdok" name="2-about-pdok"></a>
 
-## 1. Setting up NPM project with OpenLayers
+## 2. About PDOK
+
+> TODO:
+> - Explain what PDOK is
+> - Explain what services we provide
+
+PDOK is the geographical open data platform of the Dutch government. Publieke Dienstverlening op de Kaart (PDOK) provides geo web services for many Dutch governmental organisations, for instance Kadaster, CBS, RIVM, Rijkswaterstaat and many more.  
+
+Due to the [open standards policy](https://www.digitaleoverheid.nl/overzicht-van-alle-onderwerpen/standaardisatie/open-standaarden/) of the Dutch government, PDOK is using a lot of open standard where appropriate. Open standard contribute to interoperability and prevent vendor lock-in, this is important since many of the users of the PDOK services are govermental organisations themselves.
+
+Many of the standards used by PDOK concern the web service interfaces, but PDOK also uses a range of different file format standards. Many of these standards are specific for the geographical domain and originate from the Open GeoSpatial Consortium (OGC). The OGC is non-governmental, industry members organization. Members include big corporations such as Google and ESRI, but also governmental agencies are members. Members of the OGC corporate on the development of geospatial open standards. The OGC is very much like the World Wide Web Consortium (W3C), but instead of standards for the web, it makes standards for geospatial. 
+
+The most import standards for geospatial web services are:
+
+- Web Map Service (WMS) - serves out maps
+- Web Map Tile Service (WMTS) - serves out map-tiles
+- Web Feature Service (WFS) - serves out vector data (also know as features)
+- Web Coverage Service (WCS) - serves out raster data (also known as coverages)
+- Catalogue Service for the Web (CSW) - serves out metadata from the catalogue (metadata describes datasets and/or services)
+
+<a id="markdown-21-ogc-web-services-ows" name="21-ogc-web-services-ows"></a>
+
+### 2.1. OGC Web Services (OWS)
+
+The above group of service protocols is also known as the OGC Web Services (OWS). In API design these service types are very similar. For instance all service types use XML to exchange message between client and server. Also you can request for each service type a Capabilities document, which describes what that particular service instance is capable of. You can request a Capabilities document by sending a HTTP GET request with the following query parameters:
+
+```
+service={SERVICE_TYPE}&request=GetCapabilities
+```
+
+For instance for a WMS service the request looks like this:
+
+```
+http://geodata.nationaalgeoregister.nl/cbspostcode4/wms?request=GetCapabilities&service=WMS
+```
+
+<a id="markdown-22-web-map-service-wms" name="22-web-map-service-wms"></a>
+
+### 2.2. Web Map Service (WMS)
+
+WMS is a service protocol for maps; a WMS serves map images rendered from geographical data and styling rules. A WMS does not serve the underlying data. WMS supports the following three requests:
+
+- GetCapabilities: capabilities document describes layer/styles/formats/request
+- GetFeatureInfo: request feature info for location
+- GetMap: request map image
+  - request=GetMap
+  - service=WMS
+  - version=1.3.0
+  - layers={kommalijst 1 of meer lagen}
+  - styles={kommalijst overeenkomstige laagstijlen}
+  - crs={coordinatensysteem}
+  - bbox={minx,miny,maxx,maxy}
+  - width={breedte afbeelding}
+  - height={hoogte afbeelding}
+  - format={afbeeldingsformaat}
+
+
+Example WMS GetMap HTTP GET request:
+
+```
+https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&layers=postcode42017&CRS=EPSG%3A28992&STYLES=&WIDTH=2780&HEIGHT=929&BBOX=-937574%2C70963%2C1453670%2C870051
+```
+
+Nadeel van het WMS protocol is dat elk request van de client uniek is, door de combinatie van de bounding box (bbox) en de afmetingen van de afbeelding. Dit zorgt ervoor dat het in de praktijk onmogelijk is om een WMS service te cachen. Over het algemeen vergen WMS requests intensief CPU gebruik, het is niet ongewoon dat een WMS er een seconde over doet om een response te genereren.
+
+<a id="markdown-23-web-map-tile-service-wmts" name="23-web-map-tile-service-wmts"></a>
+
+### 2.3. Web Map Tile Service (WMTS)
+
+To overcome the CPU intensive on-the-fly rendering problem, application developers started using pre-rendered map tiles. Several open and proprietary schemes were invented to organize and address these map tiles. An earlier specification for this is the Tile Map Service (TMS).
+
+The idea behind WMTS is that de zoomlevels fixed zijn, en dat voor elk zoomlevel opgedeelt in een eindig aantal tiles. Dit resulteert in het algemeen in een tilematrix piramide, met op het laagste zoomniveau (0) 1 (2^0) tegels en op het hoogste zoomniveau (22) 4194304 (2^22) tegels. De simpelste tilematrix halveert elke tegel, per zoomniveau dieper, alhoewel de WMTS specificatie ook complexere tilematrixsets ondersteund.
+
+WMTS specificeert meerdere request encodings, maar om het simpel te houden behandelen we hier alleen de key-value-pairs encoding (KVP).
+
+Get requests:
+- GetCapabilities:
+- GetMap:
+- request=GetTile
+- service=WMTS
+- version=1.0.0
+- layer={laag}
+- style={laagstijl}
+- tilematrixset={tilematrixset}
+- TileMatrix={zoom niveau}
+- TileCol={y coordinate in tegelnr}
+- TileRow={x coordinate in tegelnr}
+- format={afbeeldingsformaat}
+
+Een voorbeeld van een KVP WMTS GetTile HTTP GET request:
+
+https://geodata.nationaalgeoregister.nl/tiles/service/wmts?layer=brtachtergrondkaart&style=default&tilematrixset=EPSG%3A28992&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix=02&TileCol=2&TileRow=1
+
+
+<a id="markdown-24-web-feature-service-wfs" name="24-web-feature-service-wfs"></a>
+
+### 2.4. Web Feature Service (WFS)
+
+<a id="markdown-25-nationaalgeoregister-and-catalogue-service-for-the-web-csw" name="25-nationaalgeoregister-and-catalogue-service-for-the-web-csw"></a>
+
+### 2.5. Nationaalgeoregister and Catalogue Service for the Web (CSW)
+
+CSW is een protocol om metadata records te doorzoeken die op de server staan. De catalogue in CSW is een catalogus van metadata records, deze metadata records beschrijven of datasets of services. Een centrale voorziening in de Nederlandse geodata infrastructuur is het nationaalgeoregister.nl. Dit is een geoportal waar alle gepubliceerde (geo) datasets en services van Nederlandse overheidsorganistaies in zitten, dit geoportaal implementeerd ook een CSW endpoint.
+
+Een voorbeeld van een CSW GetRecords HTTP GET request:
+```
+https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&Service=CSW&Version=2.0.2&typeNames=gmd:MD_Metadata&constraint=keyword=%27defensie%27&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&resultType=results
+```
+
+<a id="markdown-3-workshop" name="3-workshop"></a>
+
+## 3. Workshop
+
+<a id="markdown-31-setting-up-npm-project-with-openlayers" name="31-setting-up-npm-project-with-openlayers"></a>
+
+### 3.1. Setting up NPM Project with OpenLayers
 
 > TODO: Summary of section. 
 
-Run the following commands from the root of this repository:
+First start by modifying your profiles path in the Bash shell, edit the file `~/.profile` and add the following line:
+
+```bash
+export PATH=./node_modules/.bin:$PATH
+```
+
+Next make sure you load the changes in your profile by sourcing the profile file:
+
+```bash
+source ~/.profile
+```
+
+Then run the following commands from the root of this repository:
 
 ```bash
 mkdir webapp && cd webapp
@@ -171,7 +289,9 @@ Visit [`http://localhost:1234/`](http://localhost:1234/) to view the results. If
 
 ![First map!](images/viewer_step1.png "First map!")
 
-## 2. Adding base map to viewer
+<a id="markdown-32-adding-base-map" name="32-adding-base-map"></a>
+
+### 3.2. Adding Base Map
 
 > TODO: Summary of section. 
 
@@ -206,7 +326,8 @@ const baseMapLayer = new TileLayer({
     layer: 'brtachtergrondkaartgrijs',
     matrixSet: 'EPSG:3857',
     format: 'image/png',
-    attributions: 'Map data: <a href="http://www.kadaster.nl">Kadaster</a>',
+    attributions: 'Map data: <a href="http://www.kadaster.nl">Kadaster</a>
+',
     tileGrid: new WMTSTileGrid({
       origin: getTopLeft(projectionExtent),
       resolutions: resolutions,
@@ -230,11 +351,15 @@ const map = new Map({ // eslint-disable-line no-unused-vars
 
 ![BRT-Achtergrondkaart](images/brta.png "BRT-Achtergrondkaart")
 
-## 3. Adding WMS to viewer
+<a id="markdown-33-adding-wms-to-viewer" name="33-adding-wms-to-viewer"></a>
+
+### 3.3. Adding WMS to Viewer
 
 > TODO: Summary of section. 
 
-### 3.1 Adding WMS layer to viewer
+<a id="markdown-331-adding-wms-layer-to-viewer" name="331-adding-wms-layer-to-viewer"></a>
+
+#### 3.3.1. Adding WMS Layer to Viewer
 
 Now we have good looking basemap it is time to display something on top of it. 
 
@@ -276,7 +401,9 @@ Your map application should now display the `wegvakken` layer:
 
 > TODO: explain about scale dependent layer in the WMS, and other disadvantages of the WMS. 
 
-### 3.2 Adding featureinfo on click to viewer
+<a id="markdown-332-adding-featureinfo-on-click-to-viewer" name="332-adding-featureinfo-on-click-to-viewer"></a>
+
+#### 3.3.2. Adding Featureinfo on Click to Viewer
 
 The WMS standard provides a mechanism to retrieve information of features, the underlying vector data of the map. The request do retrieve feature information is called `GetFeatureInfo`. The WMS specification does not require the implementation of the `GetFeatureInfo` request, therefore a client should always check in the [capabilities document](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?request=GetCapabilities&service=wms) if the service support the `GetFeatureInfo` request. The NWB wegen WMS supports the `GetFeatureInfo` request, it is listed in the `Capability/Request` element in the XML. 
 
@@ -285,6 +412,7 @@ In this section we are going to add functionality so show a popup with feature i
 ```html
 <div id="popup" class="ol-popup">
     <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+
     <div id="popup-content"></div>
 </div>
 ```
@@ -345,7 +473,7 @@ map.on('singleclick', function(evt) {
     {'INFO_FORMAT': 'application/json'});
   if (url) {
     fetch(url)
-      .then(function (response) { return response.json(); })
+      .then(function (response) { return response.json() })
       .then(function (data) {
         // set overlay position to undefined to hide popup
         if (data.features.length == 0){
@@ -372,9 +500,9 @@ map.on('singleclick', function(evt) {
         })
         content.appendChild(table)
         overlay.setPosition(evt.coordinate)
-      });
+      })
   }
-});
+})
 ```
 
 And add the following CSS to a new `index.css` file in the root of the `webapp` folder:
@@ -398,8 +526,8 @@ html, body {
     border: 1px solid #cccccc;
     bottom: 12px;
     left: -50px;
-    min-width: 280px;
-    max-width: 600px;
+    min-width: 40vw;
+    max-width: 60vw;
     padding-top: 20px;
 }
 
@@ -510,7 +638,9 @@ HEIGHT=101&
 BBOX=603781.6790671768%2C6831433.221161786%2C604746.696549277%2C6832398.238643886
 ```
 
-## 4. Adding a GeoJSON layer to your map
+<a id="markdown-34-adding-a-geojson-layer" name="34-adding-a-geojson-layer"></a>
+
+### 3.4. Adding a GeoJSON Layer
 
 >  TODO: The advantage of using WMS/WMTS services is that you do not have take rendering performance into consideration, that is the job the server. 
 
@@ -525,16 +655,29 @@ When rendering geographical data directly on the client rendering performance is
 
 In this workshop we only do preprocessing of the data to reduce the size of the dataset. This is done by selecting only the motorways (A wegen) and joining the seperate segments into one geometry grouped by the roadletter and roadnumber combination (for instance group by A1, A2, A348 etcetera). We will use the `ogr2ogr` commandline utility for data processing.
 
-### 4.1 Preprocessing the data
+<a id="markdown-341-data-preprocessing" name="341-data-preprocessing"></a>
+
+#### 3.4.1. Data Preprocessing
 
 In this chapter we are going to create a map of the Dutch motor ways, directly rendered in the browser from a GeoJSON file. We will use the [NWB Wegen dataset](https://www.pdok.nl/introductie/-/article/nationaal-wegen-bestand-nwb-), PDOK provides WMS en WFS services and also a direct download service. In this case we will use the PDOK download service, since we want to obtain the full dataset.
 
-```bash
-curl "http://geodata.nationaalgeoregister.nl/nwbwegen/extract/nwbwegen.zip" -o ~/Downloads/nwbwegen.zip
-unzip ~/Downloads/nwbwegen.zip -d ~/Downloads/nwbwegen/ && rm ~/Downloads/nwbwegen.zip
+> NOTE: If you are using the VirtualBox image that comes with the workshop you do not need to download the file, it is already downloaded in `~/pdok-webservices-workshop/data`. 
+
+First ensure your current working directory is `~/pdok-webservices-workshop`:
+
+```
+cd ~/pdok-webservices-workshop
 ```
 
-Open the Shapefile in QGIS to inspect data from the NWB wegen dataset, Shapefile is located in: `~/Downloads/nwbwegen/geogegevens/shapefile/nederland_totaal/wegvakken/wegvakken.shp`
+```bash
+curl "http://geodata.nationaalgeoregister.nl/nwbwegen/extract/nwbwegen.zip" -o data/nwbwegen.zip
+```
+
+```
+unzip data/nwbwegen.zip -d data/
+```
+
+Open the Shapefile in QGIS to inspect data from the NWB wegen dataset, Shapefile is located in: `data/geogegevens/shapefile/nederland_totaal/wegvakken/wegvakken.shp`
 
 ![NWB Wegen in QGIS](images/qgis_nwb.png "NWB Wegen in QGIS")
 
@@ -545,25 +688,25 @@ Another concern is that the roads in the `wegvakken` layer from NWB-wegen are di
 First step is to convert the shapefile to GPKG and select only the `A` routes ([GeoPackage](https://en.wikipedia.org/wiki/GeoPackage) is the superior geospatial file format, although Shapefile is [refusing](https://twitter.com/shapefiie) to go away).
 
 ```bash
-ogr2ogr -f GPKG /tmp/nwb.gpkg ~/Downloads/nwbwegen/geogegevens/shapefile/nederland_totaal/wegvakken/wegvakken.shp -sql "select * from wegvakken where routeltr = 'A'" -nln wegvakken_a
+ogr2ogr -f GPKG data/nwb.gpkg data/geogegevens/shapefile/nederland_totaal/wegvakken/wegvakken.shp -sql "select * from wegvakken where routeltr = 'A'" -nln wegvakken_a
 ```
 
 The add a new column `route` to the wegvakken table and set the value to `routeltr+routenr`:
 
 ```bash 
-ogrinfo /tmp/nwb.gpkg -sql "alter table wegvakken_a add column route TEXT"
-ogrinfo /tmp/nwb.gpkg -sql "update wegvakken_a set route=routeltr||routenr"
+ogrinfo data/nwb.gpkg -sql "alter table wegvakken_a add column route TEXT"
+ogrinfo data/nwb.gpkg -sql "update wegvakken_a set route=routeltr||routenr"
 ```
 Now you are ready to group the geometries by the newly created `route` attribute and merge geometries of this group:
 
 ```bash
-ogr2ogr -update -f GPKG  /tmp/nwb.gpkg /tmp/nwb.gpkg -sql "SELECT ST_Union(_ogr_geometry_) as geom, route FROM wegvakken_a GROUP BY route" -nln snelwegen -nlt MULTILINESTRING
+ogr2ogr -update -f GPKG  data/nwb.gpkg data/nwb.gpkg -sql "SELECT ST_Union(_ogr_geometry_) as geom, route FROM wegvakken_a GROUP BY route" -nln snelwegen -nlt MULTILINESTRING
 ```
 
 Now convert the snelwegen layer in the GPKG to GeoJSON:
 
 ```bash
-ogr2ogr -f GeoJSON snelwegen.json /tmp/nwb.gpkg -sql "select geom, route from snelwegen" -t_srs EPSG:3857 -nln snelwegen
+ogr2ogr -f GeoJSON data/snelwegen.json data/nwb.gpkg -sql "select geom, route from snelwegen" -t_srs EPSG:3857 -nln snelwegen
 ```
 
 Open `snelwegen.json` in QGIS, to verify whether you see the expected output, compare it with the intermediate layers in `/tmp/nwb.gpkg`. You can style the layer based on the `route` attribute:
@@ -572,8 +715,13 @@ Open `snelwegen.json` in QGIS, to verify whether you see the expected output, co
 
 Then copy the `snelwegen.json` file to the `webapp` folder.
 
+```bash
+cp data/snelwegen.json webapp/
+```
 
-### 4.2 Adding a GeoJSON layer to the map
+<a id="markdown-342-adding-geojson-as-a-layer" name="342-adding-geojson-as-a-layer"></a>
+
+#### 3.4.2. Adding GeoJSON as a Layer
 
 Next we need to add some imports to the `index.js` file to display the GeoJSON file in your webapp:
 
@@ -582,13 +730,15 @@ import Point from 'ol/geom/Point'
 import { Text, Fill, Stroke, Style } from 'ol/style'
 import MultiLineString from 'ol/geom/MultiLineString'
 import VectorLayer from 'ol/layer/Vector'
+import { getCenter } from 'ol/extent'
 import { Vector as VectorSource } from 'ol/source'
 import GeoJSON from 'ol/format/GeoJSON'
+import snelwegen from './snelwegen.json'
 ```
 
 Remove the WMS layer and the click event handler, we are going to replace these with the GeoJSON layer. 
 
-Add the following to `index.js` and do not forget to add the `snelwegenLayer` to the `map` object:
+Add the following to `index.js` **and** do not forget to add the `snelwegenLayer` to the `map` object:
 
 ```js
 function styleFunc (feature) {
@@ -651,11 +801,11 @@ With a simple modification of the style function the labelling can be made dynam
 var labelPoint = multiLineString.getClosestPoint(getCenter(map.getView().calculateExtent(map.getSize())))
 ```
 
-However this is not an ideal solution either due to the jumping labels on every zoomchange. 
+However this is not an ideal solution either due to the jumping labels on panning and zoomchange by the user. 
 
 > TODO: This can off course also be solved, but as you may realise labelling is hard a problem. 
 
-Since we have the actual vector data loaded in the viewer, it is fairly easy to highlight selected features. Add the following to `index.js`:
+Since we have the actual vector data loaded in the viewer, it is fairly easy to highlight features that have been clicked. Add the following to `index.js`:
 
 ```js
 var selection = {}
@@ -692,16 +842,18 @@ map.on(['click'], function (event) {
 
 Do not forget to add the new `selectionLayer` to the map. Now when a feature on the map is clicked it will be highlighted.
 
-
 ![GeoJSON highlight](images/geojson_highlight.png "GeoJSON highlight")
 
-## 5. Using the PDOK Location Server
+<a id="markdown-35-using-the-pdok-location-server" name="35-using-the-pdok-location-server"></a>
 
+### 3.5. Using the PDOK Location Server
 
 
 > TODO: Introduction about the location server, or maybe in the general introduction
 
-### 5.1 Adding a custom control to the map
+<a id="markdown-351-adding-custom-control" name="351-adding-custom-control"></a>
+
+#### 3.5.1. Adding Custom Control
 
 See docs here: https://github.com/PDOK/locatieserver/wiki/API-Locatieserver
 
@@ -747,7 +899,9 @@ var LocationServerControl = /* @__PURE__ */(function (Control) {
 map.addControl(new LocationServerControl())
 ```
 
-### 5.2 Retrieve suggestions from Locatie Server
+<a id="markdown-352-get-suggestions-from-locatie-server" name="352-get-suggestions-from-locatie-server"></a>
+
+#### 3.5.2. Get Suggestions from Locatie Server
 
 6. add autocomplete:
 
@@ -772,7 +926,9 @@ autocomplete({
     })
 ```
 
-### 5.3 Retrieve selected object from Locatie Server
+<a id="markdown-353-get-result-from-locatie-server" name="353-get-result-from-locatie-server"></a>
+
+#### 3.5.3. Get Result from Locatie Server
 
 ```js
 onSelect: function (item) {
@@ -814,12 +970,9 @@ vectorSource.addFeature(feature)
 ```
 
 
+<a id="markdown-4-referenties" name="4-referenties"></a>
 
-
-
-
-# Referenties
+## 4. Referenties
 
 - [GeoNovum Whitepaper Geo-standaarden](https://docs.geostandaarden.nl/wp/wpgs/)
 - [Open Geospatial Consortium (OGC)](https://en.wikipedia.org/wiki/Open_Geospatial_Consortium)
-- 

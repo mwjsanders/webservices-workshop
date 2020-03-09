@@ -2,10 +2,11 @@
 
 ## Online
 
+View workshop instructions at [pdok.github.io/webservices-workshop/](https://pdok.github.io/webservices-workshop/).
 
 ## Locally
 
-Workshop content lives in `WORKSHOP.md`. HTML can be generated in the folder `html` by running;
+Workshop source lives in `src/WORKSHOP.md`. HTML can be generated in the folder `html` by running;
 
 ```
 src/scripts/workshop-build.sh
