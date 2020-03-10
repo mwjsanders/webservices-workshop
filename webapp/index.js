@@ -4,33 +4,27 @@ import WMTSSource from 'ol/source/WMTS'
 import TileLayer from 'ol/layer/Tile.js'
 import WMTSTileGrid from 'ol/tilegrid/WMTS.js'
 import { get as getProjection, fromLonLat } from 'ol/proj'
-import { getTopLeft, getWidth } from 'ol/extent.js'
-import ImageLayer from 'ol/layer/Image'
-import ImageWMS from 'ol/source/ImageWMS'
-import Overlay from 'ol/Overlay'
+import { getTopLeft, getWidth, getCenter } from 'ol/extent.js'
+import Point from 'ol/geom/Point'
+import { Text, Fill, Stroke, Style } from 'ol/style'
+import MultiLineString from 'ol/geom/MultiLineString'
+import VectorLayer from 'ol/layer/Vector'
+import { Vector as VectorSource } from 'ol/source'
+import GeoJSON from 'ol/format/GeoJSON'
+import snelwegen from './snelwegen.json'
 
-var projection = getProjection('EPSG:3857')
-var projectionExtent = projection.getExtent()
-var size = getWidth(projectionExtent) / 256
-var resolutions = new Array(20)
-var matrixIds = new Array(20)
+const projection = getProjection('EPSG:3857')
+const projectionExtent = projection.getExtent()
+const size = getWidth(projectionExtent) / 256
+const resolutions = new Array(20)
+const matrixIds = new Array(20)
 
 for (let z = 0; z < 20; ++z) {
   // generate resolutions and matrixIds arrays for this WMTS
+  // see https://openlayers.org/en/latest/examples/wmts.html
   resolutions[z] = size / Math.pow(2, z)
   matrixIds[z] = z
 }
-
-const wmsSource = new ImageWMS({
-  url: 'https://geodata.nationaalgeoregister.nl/nwbwegen/wms?',
-  crossOrigin: 'anonymous',
-  params: { LAYERS: 'wegvakken' }
-})
-
-const wsmLayer = new ImageLayer({
-  extent: projectionExtent,
-  source: wmsSource
-})
 
 const baseMapLayer = new TileLayer({
   extent: projectionExtent,
@@ -39,7 +33,7 @@ const baseMapLayer = new TileLayer({
     layer: 'brtachtergrondkaartgrijs',
     matrixSet: 'EPSG:3857',
     format: 'image/png',
-    attributions: 'Map data: <a href="http://www.kadaster.nl">Kadaster</a>',
+    attributions: 'BRT achtergrondkaart: <a href="http://www.kadaster.nl">Kadaster</a>',
     tileGrid: new WMTSTileGrid({
       origin: getTopLeft(projectionExtent),
       resolutions: resolutions,
@@ -49,76 +43,94 @@ const baseMapLayer = new TileLayer({
   })
 })
 
-// Elements that make up the popup.
-var container = document.getElementById('popup')
-var content = document.getElementById('popup-content')
-var closer = document.getElementById('popup-closer')
+function styleFunc (feature) {
+  const styles = [
+    new Style({
+      stroke: new Stroke({
+        color: 'red',
+        width: 5
+      })
+    }),
+    new Style({
+      stroke: new Stroke({
+        color: 'white',
+        width: 1
+      })
+    })
+  ]
+  styles.push(new Style({
+    geometry: function (feature) {
+      var multiLineString = new MultiLineString(feature.getGeometry().getCoordinates())
+      // labelPoint is the closest point on the line from the center of the extent of the geometry
+      var labelPoint = multiLineString.getClosestPoint(getCenter(feature.getGeometry().getExtent()))
+      return new Point(labelPoint)
+    },
+    text: new Text({
+      text: feature.get('route'),
+      font: '1em sans-serif',
+      stroke: new Stroke({
+        color: 'green',
+        width: 6
+      }),
+      fill: new Fill({
+        color: 'white'
+      }),
+      overflow: true
+    })
+  }))
+  return styles
+}
 
-// Create an overlay to anchor the popup to the map.
-var overlay = new Overlay({
-  element: container,
-  autoPan: true,
-  autoPanAnimation: {
-    duration: 250
-  }
+const snelwegenSource = new VectorSource({
+  features: (new GeoJSON(
+  )).readFeatures(snelwegen)
 })
 
-// Add a click handler to hide the popup.
-closer.onclick = function () {
-  overlay.setPosition(undefined)
-  closer.blur()
-  return false
-}
+const snelwegenLayer = new VectorLayer({
+  source: snelwegenSource,
+  style: styleFunc,
+  declutter: true
+})
+
+var selection = {}
+const selectionLayer = new VectorLayer({
+  declutter: true,
+  source: snelwegenLayer.getSource(),
+  style: function (feature) {
+    if (feature.get('route') in selection) {
+      return new Style({
+        stroke: new Stroke({
+          color: 'yellow',
+          width: 1.5
+        })
+      })
+    }
+  }
+})
 
 const map = new Map({ // eslint-disable-line no-unused-vars
   layers: [
     baseMapLayer,
-    wsmLayer
+    snelwegenLayer,
+    selectionLayer
   ],
-  overlays: [overlay],
   target: 'map',
   view: new View({
     center: fromLonLat([5.43, 52.18]),
-    zoom: 14
+    zoom: 8
   })
 })
 
-map.on('singleclick', function (evt) {
-  // clean content of popup on every new singeclick event
-  if (content.childNodes.length > 0) content.childNodes[0].remove()
-  const viewResolution = /** @type {number} */ (map.getView().getResolution())
-  const url = wmsSource.getFeatureInfoUrl(
-    evt.coordinate, viewResolution, 'EPSG:3857',
-    { INFO_FORMAT: 'application/json' })
-  if (url) {
-    fetch(url)
-      .then(function (response) { return response.json() })
-      .then(function (data) {
-        // set overlay position to undefined to hide popup
-        if (data.features.length === 0) {
-          overlay.setPosition(undefined)
-          return
-        }
-        const ft = data.features[0]
-        const table = document.createElement('table')
-        const header = table.createTHead()
-        let row = header.insertRow()
-        let i = 0
-        Object.keys(ft.properties).forEach(function (item) {
-          const cell = row.insertCell(i)
-          cell.innerHTML = item
-          i++
-        })
-        const body = table.createTBody()
-        row = body.insertRow()
-        i = 0
-        Object.keys(ft.properties).forEach(function (item) {
-          const cell = row.insertCell(i)
-          cell.innerHTML = ft.properties[item]
-          i++
-        })
-        content.appendChild(table)
-        overlay.setPosition(evt.coordinate)
-      })
+map.on(['click'], function (event) {
+  const features = map.getFeaturesAtPixel(event.pixel, { hitTolerance: 3 })
+  if (!features.length) {
+    selection = {}
+    selectionLayer.changed()
+    return
   }
+  const feature = features[features.length - 1]
+  const identifier = feature.get('route')
+  selection = {}
+  selection[identifier] = feature
+  selectionLayer.changed()
 })

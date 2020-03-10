@@ -1,5 +1,5 @@
 {
-  "name": "webapp",
+  "name": "viewer",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -12,7 +12,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ol": "^6.2.1"
+    "ol": "^6.2.1",
+    "ol-mapbox-style": "^6.0.1",
+    "proj4": "^2.6.0"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
