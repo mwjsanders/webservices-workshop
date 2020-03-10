@@ -124,7 +124,7 @@ Nadeel van het WMS protocol is dat elk request van de client uniek is, door de c
 
 To overcome the CPU intensive on-the-fly rendering problem, application developers started using pre-rendered map tiles. Several open and proprietary schemes were invented to organize and address these map tiles. An earlier specification for this is the Tile Map Service (TMS).
 
-The idea behind WMTS is that de zoomlevels fixed zijn, en dat voor elk zoomlevel opgedeelt in een eindig aantal tiles. Dit resulteert in het algemeen in een tilematrix piramide, met op het laagste zoomniveau (0) 1 (2^0) tegels en op het hoogste zoomniveau (22) 4194304 (2^22) tegels. De simpelste tilematrix halveert elke tegel, per zoomniveau dieper, alhoewel de WMTS specificatie ook complexere tilematrixsets ondersteund.
+The idea behind WMTS is that de zoomlevels fixed zijn, en dat voor elk zoomlevel opgedeelt in een eindig aantal tiles. Dit resulteert in het algemeen in een tilematrix piramide, met op het laagste zoomniveau (0) 1 (4^0) tegels en op het hoogste zoomniveau (22) 17592186044416 (4^22) tegels. De simpelste tilematrix deelt elke tegel in vieren, per zoomniveau dieper, alhoewel de WMTS specificatie ook complexere tilematrixsets ondersteund.
 
 WMTS specificeert meerdere request encodings, maar om het simpel te houden behandelen we hier alleen de key-value-pairs encoding (KVP).
 
@@ -214,7 +214,11 @@ Then setup ESLint by running `eslinit --init` and answer questions with:
 - Would you like to install them now with npm?
     - y
 
-Now let's start coding, create the file `index.js` in the folder `webapp` with the following content:
+Now let's start coding!
+
+> NOTE: When you heave trouble runnig your webapp, you could start by linting your javascript files: `eslint index.js`
+
+Create the file `index.js` in the folder `webapp` with the following content:
 
 ```js
 import 'ol/ol.css'
@@ -279,7 +283,7 @@ Replace the empty `scripts` element in the `webapp/package.json` file with the f
 }
 ```
 
-No run the following command from the `webapp/` directory:
+Now run the following command from the `webapp/` directory:
 
 ```
 npm start
@@ -326,8 +330,7 @@ const baseMapLayer = new TileLayer({
     layer: 'brtachtergrondkaartgrijs',
     matrixSet: 'EPSG:3857',
     format: 'image/png',
-    attributions: 'Map data: <a href="http://www.kadaster.nl">Kadaster</a>
-',
+    attributions: 'Map data: <a href="http://www.kadaster.nl">Kadaster</a>',
     tileGrid: new WMTSTileGrid({
       origin: getTopLeft(projectionExtent),
       resolutions: resolutions,
@@ -365,7 +368,7 @@ Now we have good looking basemap it is time to display something on top of it.
 
 [*NWB Wegen*](https://www.pdok.nl/introductie/-/article/nationaal-wegen-bestand-nwb-) dataset which is also published as a WMS service. The *Geo Services* tab provides a [WMS service url](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?request=GetCapabilities&service=wms). The URL provided links to the `capabilities` document, which describes what the service is capable of. The capabilities document lists which layers, styles, image formats and projections are available and more.
 
-To add the `wegvakken` layer from the WMS service to the map add the following to the `view/index.js` document before the declaration of the `map` object and do not forget to add `wsmLayer` to the map object. We also need to set the zoomlevel of the initial view to `14` in order to see the WMS layer. This is due to the way this WMS service is configured, in the capabilities document the `wegvakken` layer has a `MaxScaleDenominator` property set to `50000`. This means that the layer is visible from scale `1:1` until `1:50000`. In terms of WMTS zoomlevels this means that layer is visible from zoomlevel `14` and up.
+To add the `wegvakken` layer from the WMS service to the map add the following to the `view/index.js` document before the declaration of the `map` object.
 
 ```js
 import ImageLayer from 'ol/layer/Image'
@@ -382,6 +385,11 @@ const wsmLayer = new ImageLayer({
   source: wmsSource
 })
 
+```
+ Do not forget to add `wsmLayer` to the map object. We also need to set the zoomlevel of the initial view to `14` in order to see the WMS layer. This is due to the way this WMS service is configured, in the capabilities document the `wegvakken` layer has a `MaxScaleDenominator` property set to `50000`. This means that the layer is visible from scale `1:1` until `1:50000`. In terms of WMTS zoomlevels this means that layer is visible from zoomlevel `14` and up. The map object declaration should now look like this:
+
+
+```js
 const map = new Map({ // eslint-disable-line no-unused-vars
   layers: [
     baseMapLayer,
