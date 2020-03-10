@@ -102,7 +102,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p>TODO: - Explain what PDOK is - Explain what services we provide</p>
 </blockquote>
 <p>PDOK is the geographical open data platform of the Dutch government. Publieke Dienstverlening op de Kaart (PDOK) provides geo web services for many Dutch governmental organisations, for instance Kadaster, CBS, RIVM, Rijkswaterstaat and many more.</p>
-<p>Due to the <a href="https://www.digitaleoverheid.nl/overzicht-van-alle-onderwerpen/standaardisatie/open-standaarden/">open standards policy</a> of the Dutch government, PDOK is using a lot of open standard where appropriate. Open standard contribute to interoperability and prevent vendor lock-in, this is important since many of the users of the PDOK services are govermental organisations themselves.</p>
+<p>Due to the <a href="https://www.digitaleoverheid.nl/overzicht-van-alle-onderwerpen/standaardisatie/open-standaarden/">open standards policy</a> of the Dutch government, PDOK is using many open standards. Open standard contribute to interoperability and prevent vendor lock-in, this is important since many of the users of the PDOK services are govermental organisations themselves.</p>
 <p>Many of the standards used by PDOK concern the web service interfaces, but PDOK also uses a range of different file format standards. Many of these standards are specific for the geographical domain and originate from the Open GeoSpatial Consortium (OGC). The OGC is non-governmental, industry members organization. Members include big corporations such as Google and ESRI, but also governmental agencies are members. Members of the OGC corporate on the development of geospatial open standards. The OGC is very much like the World Wide Web Consortium (W3C), but instead of standards for the web, it makes standards for geospatial.</p>
 <p>The most import standards for geospatial web services are:</p>
 <ul>
@@ -115,9 +115,9 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <p><a id="markdown-21-ogc-web-services-ows" name="21-ogc-web-services-ows"></a></p>
 <h3 id="ogc-web-services-ows">2.1. OGC Web Services (OWS)</h3>
 <p>The above group of service protocols is also known as the OGC Web Services (OWS). In API design these service types are very similar. For instance all service types use XML to exchange message between client and server. Also you can request for each service type a Capabilities document, which describes what that particular service instance is capable of. You can request a Capabilities document by sending a HTTP GET request with the following query parameters:</p>
-<pre><code>service={SERVICE_TYPE}&amp;request=GetCapabilities</code></pre>
+<pre class="http"><code>service={SERVICE_TYPE}&amp;request=GetCapabilities</code></pre>
 <p>For instance for a WMS service the request looks like this:</p>
-<pre><code>http://geodata.nationaalgeoregister.nl/cbspostcode4/wms?request=GetCapabilities&amp;service=WMS</code></pre>
+<pre class="http"><code>https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?request=GetCapabilities&amp;service=WMS</code></pre>
 <p><a id="markdown-22-web-map-service-wms" name="22-web-map-service-wms"></a></p>
 <h3 id="web-map-service-wms">2.2. Web Map Service (WMS)</h3>
 <p>WMS is a service protocol for maps; a WMS serves map images rendered from geographical data and styling rules. A WMS does not serve the underlying data. WMS supports the following three requests:</p>
@@ -128,36 +128,39 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>request=GetMap</li>
 <li>service=WMS</li>
 <li>version=1.3.0</li>
-<li>layers={kommalijst 1 of meer lagen}</li>
-<li>styles={kommalijst overeenkomstige laagstijlen}</li>
-<li>crs={coordinatensysteem}</li>
+<li>layers={comma separated list 1 or more layers}</li>
+<li>styles={comma separated list of available layerstyling}</li>
+<li>crs={coordinate system}</li>
 <li>bbox={minx,miny,maxx,maxy}</li>
-<li>width={breedte afbeelding}</li>
-<li>height={hoogte afbeelding}</li>
-<li>format={afbeeldingsformaat}</li>
+<li>width={width of the image}</li>
+<li>height={height of the image}</li>
+<li>format={image format}</li>
 </ul>
 <p>Example WMS GetMap HTTP GET request:</p>
-<pre><code>https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;layers=postcode42017&amp;CRS=EPSG%3A28992&amp;STYLES=&amp;WIDTH=2780&amp;HEIGHT=929&amp;BBOX=-937574%2C70963%2C1453670%2C870051</code></pre>
+<pre class="http"><code>https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;layers=postcode42017&amp;CRS=EPSG%3A28992&amp;STYLES=&amp;WIDTH=2780&amp;HEIGHT=929&amp;BBOX=-937574%2C70963%2C1453670%2C870051</code></pre>
 <p>Nadeel van het WMS protocol is dat elk request van de client uniek is, door de combinatie van de bounding box (bbox) en de afmetingen van de afbeelding. Dit zorgt ervoor dat het in de praktijk onmogelijk is om een WMS service te cachen. Over het algemeen vergen WMS requests intensief CPU gebruik, het is niet ongewoon dat een WMS er een seconde over doet om een response te genereren.</p>
 <p><a id="markdown-23-web-map-tile-service-wmts" name="23-web-map-tile-service-wmts"></a></p>
 <h3 id="web-map-tile-service-wmts">2.3. Web Map Tile Service (WMTS)</h3>
 <p>To overcome the CPU intensive on-the-fly rendering problem, application developers started using pre-rendered map tiles. Several open and proprietary schemes were invented to organize and address these map tiles. An earlier specification for this is the Tile Map Service (TMS).</p>
 <p>The idea behind WMTS is that de zoomlevels fixed zijn, en dat voor elk zoomlevel opgedeelt in een eindig aantal tiles. Dit resulteert in het algemeen in een tilematrix piramide, met op het laagste zoomniveau (0) 1 (2^0) tegels en op het hoogste zoomniveau (22) 4194304 (2^22) tegels. De simpelste tilematrix halveert elke tegel, per zoomniveau dieper, alhoewel de WMTS specificatie ook complexere tilematrixsets ondersteund.</p>
 <p>WMTS specificeert meerdere request encodings, maar om het simpel te houden behandelen we hier alleen de key-value-pairs encoding (KVP).</p>
-<p>Get requests: - GetCapabilities: - GetMap: - request=GetTile - service=WMTS - version=1.0.0 - layer={laag} - style={laagstijl} - tilematrixset={tilematrixset} - TileMatrix={zoom niveau} - TileCol={y coordinate in tegelnr} - TileRow={x coordinate in tegelnr} - format={afbeeldingsformaat}</p>
+<p>Get requests: - GetCapabilities: - GetMap: - request=GetTile - service=WMTS - version=1.0.0 - layer={layer name} - style={layer style} - tilematrixset={tilematrixset} - TileMatrix={zoom level} - TileCol={y coordinate of tile number} - TileRow={x coordinate of tile number} - format={image format}</p>
 <p>Een voorbeeld van een KVP WMTS GetTile HTTP GET request:</p>
-<p>https://geodata.nationaalgeoregister.nl/tiles/service/wmts?layer=brtachtergrondkaart&amp;style=default&amp;tilematrixset=EPSG%3A28992&amp;Service=WMTS&amp;Request=GetTile&amp;Version=1.0.0&amp;Format=image%2Fpng&amp;TileMatrix=02&amp;TileCol=2&amp;TileRow=1</p>
+<pre class="http"><code>https://geodata.nationaalgeoregister.nl/tiles/service/wmts?layer=brtachtergrondkaart&amp;style=default&amp;tilematrixset=EPSG%3A28992&amp;Service=WMTS&amp;Request=GetTile&amp;Version=1.0.0&amp;Format=image%2Fpng&amp;TileMatrix=02&amp;TileCol=2&amp;TileRow=1</code></pre>
 <p><a id="markdown-24-web-feature-service-wfs" name="24-web-feature-service-wfs"></a></p>
 <h3 id="web-feature-service-wfs">2.4. Web Feature Service (WFS)</h3>
 <p><a id="markdown-25-nationaalgeoregister-and-catalogue-service-for-the-web-csw" name="25-nationaalgeoregister-and-catalogue-service-for-the-web-csw"></a></p>
 <h3 id="nationaalgeoregister-and-catalogue-service-for-the-web-csw">2.5. Nationaalgeoregister and Catalogue Service for the Web (CSW)</h3>
 <p>CSW is een protocol om metadata records te doorzoeken die op de server staan. De catalogue in CSW is een catalogus van metadata records, deze metadata records beschrijven of datasets of services. Een centrale voorziening in de Nederlandse geodata infrastructuur is het nationaalgeoregister.nl. Dit is een geoportal waar alle gepubliceerde (geo) datasets en services van Nederlandse overheidsorganistaies in zitten, dit geoportaal implementeerd ook een CSW endpoint.</p>
 <p>Een voorbeeld van een CSW GetRecords HTTP GET request:</p>
-<pre><code>https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&amp;Service=CSW&amp;Version=2.0.2&amp;typeNames=gmd:MD_Metadata&amp;constraint=keyword=%27defensie%27&amp;constraintLanguage=CQL_TEXT&amp;constraint_language_version=1.1.0&amp;resultType=results</code></pre>
+<pre class="http"><code>https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&amp;Service=CSW&amp;Version=2.0.2&amp;typeNames=gmd:MD_Metadata&amp;constraint=keyword=%27defensie%27&amp;constraintLanguage=CQL_TEXT&amp;constraint_language_version=1.1.0&amp;resultType=results</code></pre>
 <p><a id="markdown-3-workshop" name="3-workshop"></a></p>
 <h2 id="workshop">3. Workshop</h2>
 <p><a id="markdown-31-setting-up-npm-project-with-openlayers" name="31-setting-up-npm-project-with-openlayers"></a></p>
 <h3 id="setting-up-npm-project-with-openlayers">3.1. Setting up NPM Project with OpenLayers</h3>
+<blockquote>
+<p>TOOD: summrary of section</p>
+</blockquote>
 <h4 id="install-dependencies-and-setup-eslint">3.1.1 Install dependencies and setup ESLint</h4>
 <p>First start by modifying your profiles path in the Bash shell, edit the file <code>~/.profile</code> and add the following line:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">export</span> <span class="va">PATH=</span>./node_modules/.bin:<span class="va">$PATH</span></code></pre></div>
@@ -165,7 +168,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">source</span> ~/.profile</code></pre></div>
 <p>Then run the following commands from the root of this repository:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">mkdir</span> webapp <span class="kw">&amp;&amp;</span> <span class="bu">cd</span> webapp
-<span class="ex">npm</span> init -y 
+<span class="ex">npm</span> init -y
 <span class="ex">npm</span> install ol
 <span class="ex">npm</span> install --save-dev parcel-bundler eslint</code></pre></div>
 <p>Setting up a linter helps with detecting syntax errors and conforming to a particular style guide. This workshop uses ESLint a JavaScript linter, setup ESLint by running <code>eslinit --init</code> and answer questions with:</p>
@@ -267,7 +270,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
     <span class="dt">&quot;build&quot;</span><span class="fu">:</span> <span class="st">&quot;parcel build --public-url . index.html&quot;</span>
 <span class="fu">}</span></code></pre></div>
 <p>No run the following command from the <code>webapp/</code> directory:</p>
-<pre><code>npm start</code></pre>
+<pre class="npm"><code>npm start</code></pre>
 <p>Visit <a href="http://localhost:1234/"><code>http://localhost:1234/</code></a> to view the glorious result. If correct you should see a interactive map in your browser with the default OpenLayers basemap.</p>
 <div class="figure">
 <img src="images/viewer_step1.png" title="First map!" alt="First map!" />
@@ -566,7 +569,7 @@ tbody td<span class="in">:nth-of-type</span>(odd), thead td<span class="in">:nth
 <p class="caption">Feature information</p>
 </div>
 <p>What happens in the background is that OpenLayers registers on which pixel coordinate a user clicks. This is information is combined with the query parameters of the previous WMS <code>GetMap</code> request, to create a <code>GetFeatureInfo</code> request. In the below example <code>GetFeatureInfo</code> request the user clicked on pixel coordinate <code>50,50</code> of an image with <code>WIDTH</code> and <code>HEIGHT</code> of <code>101,101</code>, <a href="https://geodata.nationaalgeoregister.nl/nwbwegen/wms?SERVICE=WMS&amp;VERSION=1.3.0&amp;REQUEST=GetMap&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;LAYERS=wegvakken&amp;CRS=EPSG%3A3857&amp;STYLES=&amp;WIDTH=101&amp;HEIGHT=101&amp;BBOX=603781.6790671768%2C6831433.221161786%2C604746.696549277%2C6832398.238643886">this</a> is the corresponding <code>GetMap</code> request.</p>
-<pre><code>https://geodata.nationaalgeoregister.nl/nwbwegen/wms?SERVICE=WMS&amp;
+<pre class="http"><code>https://geodata.nationaalgeoregister.nl/nwbwegen/wms?SERVICE=WMS&amp;
 VERSION=1.3.0&amp;
 REQUEST=GetFeatureInfo&amp;
 FORMAT=image%2Fpng&amp;
@@ -603,9 +606,9 @@ BBOX=603781.6790671768%2C6831433.221161786%2C604746.696549277%2C6832398.23864388
 <p>NOTE: If you are using the VirtualBox image that comes with the workshop you do not need to download the file, it is already downloaded in <code>~/pdok-webservices-workshop/data</code>.</p>
 </blockquote>
 <p>First ensure your current working directory is <code>~/pdok-webservices-workshop</code>:</p>
-<pre><code>cd ~/pdok-webservices-workshop</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">cd</span> ~/pdok-webservices-workshop</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">curl</span> <span class="st">&quot;http://geodata.nationaalgeoregister.nl/nwbwegen/extract/nwbwegen.zip&quot;</span> -o data/nwbwegen.zip</code></pre></div>
-<pre><code>unzip data/nwbwegen.zip -d data/</code></pre>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="fu">unzip</span> data/nwbwegen.zip -d data/</code></pre></div>
 <p>Open the Shapefile in QGIS to inspect data from the NWB wegen dataset, Shapefile is located in: <code>data/geogegevens/shapefile/nederland_totaal/wegvakken/wegvakken.shp</code></p>
 <div class="figure">
 <img src="images/qgis_nwb.png" title="NWB Wegen in QGIS" alt="NWB Wegen in QGIS" />
