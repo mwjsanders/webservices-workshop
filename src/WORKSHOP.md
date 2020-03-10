@@ -41,15 +41,13 @@ header-includes:
 
 ## 1. Introduction
 
-In this workshop you will build a web application with an interactive map using the PDOK (map) services. The web application is build with OpenLayers version 6.2.1, an Open Source Javascript library. 
+In this workshop you will build a web application with an interactive map using the PDOK (map) services. The web application is build with OpenLayers version 6.2.1, an Open Source Javascript library.
 
-While building the webapplication you will learn the difference between the different (geo) service types PDOK is providing, such as WMS, WMTS, WFS and WCS. 
+While building the webapplication you will learn the difference between the different (geo) service types PDOK is providing, such as WMS, WMTS, WFS and WCS.
 
 https://www.dropbox.com/sh/6j3e40thy9pspoi/AACS2NCHaT0h8JbKLTDSpZx9a?dl=0
 
-
 > NOTE: All created applications in this workshop will use the cartographic projection [*Web Mercator*](https://en.wikipedia.org/wiki/Web_Mercator_projection) `EPSG:3857`. This is the de facto standard in map projections for web mapping applications. Governmental organisations in the Netherlands often require the use of the [*Amersfoort/RD New*](https://nl.wikipedia.org/wiki/Rijksdriehoeksco%C3%B6rdinaten) `EPSG:28992` projection, some the map services of PDOK are only available in the *Amersfoort/RD New* projection. More information about map projections can be found on [Wikipedia](https://en.wikipedia.org/wiki/Map_projection).
-
 
 <a id="markdown-2-about-pdok" name="2-about-pdok"></a>
 
@@ -79,14 +77,14 @@ The most import standards for geospatial web services are:
 
 The above group of service protocols is also known as the OGC Web Services (OWS). In API design these service types are very similar. For instance all service types use XML to exchange message between client and server. Also you can request for each service type a Capabilities document, which describes what that particular service instance is capable of. You can request a Capabilities document by sending a HTTP GET request with the following query parameters:
 
-```
+```http
 service={SERVICE_TYPE}&request=GetCapabilities
 ```
 
 For instance for a WMS service the request looks like this:
 
-```
-http://geodata.nationaalgeoregister.nl/cbspostcode4/wms?request=GetCapabilities&service=WMS
+```http
+https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?request=GetCapabilities&service=WMS
 ```
 
 <a id="markdown-22-web-map-service-wms" name="22-web-map-service-wms"></a>
@@ -101,18 +99,17 @@ WMS is a service protocol for maps; a WMS serves map images rendered from geogra
   - request=GetMap
   - service=WMS
   - version=1.3.0
-  - layers={kommalijst 1 of meer lagen}
-  - styles={kommalijst overeenkomstige laagstijlen}
-  - crs={coordinatensysteem}
+  - layers={comma separated list 1 or more layers}
+  - styles={comma separated list of available layerstyling}
+  - crs={coordinate system}
   - bbox={minx,miny,maxx,maxy}
-  - width={breedte afbeelding}
-  - height={hoogte afbeelding}
-  - format={afbeeldingsformaat}
-
+  - width={width of the image}
+  - height={height of the image}
+  - format={image format}
 
 Example WMS GetMap HTTP GET request:
 
-```
+```http
 https://geodata.nationaalgeoregister.nl/cbspostcode4/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&layers=postcode42017&CRS=EPSG%3A28992&STYLES=&WIDTH=2780&HEIGHT=929&BBOX=-937574%2C70963%2C1453670%2C870051
 ```
 
@@ -134,18 +131,19 @@ Get requests:
 - request=GetTile
 - service=WMTS
 - version=1.0.0
-- layer={laag}
-- style={laagstijl}
+- layer={layer name}
+- style={layer style}
 - tilematrixset={tilematrixset}
-- TileMatrix={zoom niveau}
-- TileCol={y coordinate in tegelnr}
-- TileRow={x coordinate in tegelnr}
-- format={afbeeldingsformaat}
+- TileMatrix={zoom level}
+- TileCol={y coordinate of tile number}
+- TileRow={x coordinate of tile number}
+- format={image format}
 
 Een voorbeeld van een KVP WMTS GetTile HTTP GET request:
 
+```http
 https://geodata.nationaalgeoregister.nl/tiles/service/wmts?layer=brtachtergrondkaart&style=default&tilematrixset=EPSG%3A28992&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix=02&TileCol=2&TileRow=1
-
+```
 
 <a id="markdown-24-web-feature-service-wfs" name="24-web-feature-service-wfs"></a>
 
@@ -158,7 +156,8 @@ https://geodata.nationaalgeoregister.nl/tiles/service/wmts?layer=brtachtergrondk
 CSW is een protocol om metadata records te doorzoeken die op de server staan. De catalogue in CSW is een catalogus van metadata records, deze metadata records beschrijven of datasets of services. Een centrale voorziening in de Nederlandse geodata infrastructuur is het nationaalgeoregister.nl. Dit is een geoportal waar alle gepubliceerde (geo) datasets en services van Nederlandse overheidsorganistaies in zitten, dit geoportaal implementeerd ook een CSW endpoint.
 
 Een voorbeeld van een CSW GetRecords HTTP GET request:
-```
+
+```http
 https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&Service=CSW&Version=2.0.2&typeNames=gmd:MD_Metadata&constraint=keyword=%27defensie%27&constraintLanguage=CQL_TEXT&constraint_language_version=1.1.0&resultType=results
 ```
 
@@ -170,7 +169,11 @@ https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&Se
 
 ### 3.1. Setting up NPM Project with OpenLayers
 
+
+> TOOD: summrary of section
+
 #### 3.1.1 Install dependencies and setup ESLint
+
 
 First start by modifying your profiles path in the Bash shell, edit the file `~/.profile` and add the following line:
 
@@ -188,7 +191,7 @@ Then run the following commands from the root of this repository:
 
 ```bash
 mkdir webapp && cd webapp
-npm init -y 
+npm init -y
 npm install ol
 npm install --save-dev parcel-bundler eslint
 ```
@@ -199,18 +202,18 @@ Setting up a linter helps with detecting syntax errors and conforming to a parti
     - To check syntax, find problems, and enforce code style
 - What type of modules does your project use? (Use arrow keys)
     - JavaScript modules (import/export)
-- Which framework does your project use? 
-    - None of these 
-- Does your project use TypeScript? 
+- Which framework does your project use?
+    - None of these
+- Does your project use TypeScript?
     - n
 - Where does your code run?
     - Browser
-- Which style guide do you want to follow? 
+- Which style guide do you want to follow?
     - Use a popular style guide
-- Which style guide do you want to follow? 
+- Which style guide do you want to follow?
     - Standard: https://github.com/standard/standard
 - What format do you want your config file to be in? (Use arrow keys)
-    - JavaScript 
+    - JavaScript
 - Would you like to install them now with npm?
     - y
 
@@ -295,7 +298,7 @@ Replace the `scripts` element in the `webapp/package.json` file with the followi
 
 No run the following command from the `webapp/` directory:
 
-```
+```npm
 npm start
 ```
 
@@ -307,7 +310,7 @@ Visit [`http://localhost:1234/`](http://localhost:1234/) to view the glorious re
 
 ### 3.2. Adding Base Map
 
-> TODO: Summary of section. 
+> TODO: Summary of section.
 
 Replace the code in `viewer/index.js` with the following:
 
@@ -369,13 +372,13 @@ const map = new Map({ // eslint-disable-line no-unused-vars
 
 ### 3.3. Adding WMS to Viewer
 
-> TODO: Summary of section. 
+> TODO: Summary of section.
 
 <a id="markdown-331-adding-wms-layer-to-viewer" name="331-adding-wms-layer-to-viewer"></a>
 
 #### 3.3.1. Adding WMS Layer to Viewer
 
-Now we have good looking basemap it is time to display something on top of it. 
+Now we have good looking basemap it is time to display something on top of it.
 
 [*NWB Wegen*](https://www.pdok.nl/introductie/-/article/nationaal-wegen-bestand-nwb-) dataset which is also published as a WMS service. The *Geo Services* tab provides a [WMS service url](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?request=GetCapabilities&service=wms). The URL provided links to the `capabilities` document, which describes what the service is capable of. The capabilities document lists which layers, styles, image formats and projections are available and more.
 
@@ -407,19 +410,19 @@ const map = new Map({ // eslint-disable-line no-unused-vars
     zoom: 14
   })
 })
-
 ```
+
 Your map application should now display the `wegvakken` layer:
 
 ![WMS layer](images/wms_layer.png "WMS layer")
 
-> TODO: explain about scale dependent layer in the WMS, and other disadvantages of the WMS. 
+> TODO: explain about scale dependent layer in the WMS, and other disadvantages of the WMS.
 
 <a id="markdown-332-adding-featureinfo-on-click-to-viewer" name="332-adding-featureinfo-on-click-to-viewer"></a>
 
 #### 3.3.2. Adding Featureinfo on Click to Viewer
 
-The WMS standard provides a mechanism to retrieve information of features, the underlying vector data of the map. The request do retrieve feature information is called `GetFeatureInfo`. The WMS specification does not require the implementation of the `GetFeatureInfo` request, therefore a client should always check in the [capabilities document](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?request=GetCapabilities&service=wms) if the service support the `GetFeatureInfo` request. The NWB wegen WMS supports the `GetFeatureInfo` request, it is listed in the `Capability/Request` element in the XML. 
+The WMS standard provides a mechanism to retrieve information of features, the underlying vector data of the map. The request do retrieve feature information is called `GetFeatureInfo`. The WMS specification does not require the implementation of the `GetFeatureInfo` request, therefore a client should always check in the [capabilities document](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?request=GetCapabilities&service=wms) if the service support the `GetFeatureInfo` request. The NWB wegen WMS supports the `GetFeatureInfo` request, it is listed in the `Capability/Request` element in the XML.
 
 In this section we are going to add functionality so show a popup with feature information when a users clicks on the map. To do this add the following to the `body` element of `index.html`, before the `script.js` inclusion:
 
@@ -627,14 +630,13 @@ Remove the `style` element from the `index.html` file and replace with:
 <link rel="stylesheet" type="text/css" href="index.css">
 ```
 
-
 Reload the webapp in the browser,now the map should display a popover when a feature is clicked on the map.
 
 ![Feature information](images/get_feature_info.png "Feature information")
 
 What happens in the background is that OpenLayers registers on which pixel coordinate a user clicks. This is information is combined with the query parameters of the previous WMS `GetMap` request, to create a `GetFeatureInfo` request. In the below example `GetFeatureInfo` request the user clicked on pixel coordinate `50,50` of an image with `WIDTH` and `HEIGHT` of `101,101`, [this](https://geodata.nationaalgeoregister.nl/nwbwegen/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=wegvakken&CRS=EPSG%3A3857&STYLES=&WIDTH=101&HEIGHT=101&BBOX=603781.6790671768%2C6831433.221161786%2C604746.696549277%2C6832398.238643886) is the corresponding `GetMap` request.
 
-```
+```http
 https://geodata.nationaalgeoregister.nl/nwbwegen/wms?SERVICE=WMS&
 VERSION=1.3.0&
 REQUEST=GetFeatureInfo&
@@ -656,7 +658,7 @@ BBOX=603781.6790671768%2C6831433.221161786%2C604746.696549277%2C6832398.23864388
 
 ### 3.4. Adding a GeoJSON Layer
 
->  TODO: The advantage of using WMS/WMTS services is that you do not have take rendering performance into consideration, that is the job the server. 
+> TODO: The advantage of using WMS/WMTS services is that you do not have take rendering performance into consideration, that is the job the server.
 
 A different approach to displaying geographical data is, instead of using WMS and WMTS services, downloading the vector data in the client and displaying the vector data directly. In this scenario there is no need for a server and gives you complete freedom of styling of the data. One major drawback of this approach is performance, processing power on the client is limited; there is a upper limit on the number of features you can load in your map (at once).
 
@@ -675,11 +677,11 @@ In this workshop we only do preprocessing of the data to reduce the size of the 
 
 In this chapter we are going to create a map of the Dutch motor ways, directly rendered in the browser from a GeoJSON file. We will use the [NWB Wegen dataset](https://www.pdok.nl/introductie/-/article/nationaal-wegen-bestand-nwb-), PDOK provides WMS en WFS services and also a direct download service. In this case we will use the PDOK download service, since we want to obtain the full dataset.
 
-> NOTE: If you are using the VirtualBox image that comes with the workshop you do not need to download the file, it is already downloaded in `~/pdok-webservices-workshop/data`. 
+> NOTE: If you are using the VirtualBox image that comes with the workshop you do not need to download the file, it is already downloaded in `~/pdok-webservices-workshop/data`.
 
 First ensure your current working directory is `~/pdok-webservices-workshop`:
 
-```
+```bash
 cd ~/pdok-webservices-workshop
 ```
 
@@ -687,7 +689,7 @@ cd ~/pdok-webservices-workshop
 curl "http://geodata.nationaalgeoregister.nl/nwbwegen/extract/nwbwegen.zip" -o data/nwbwegen.zip
 ```
 
-```
+```bash
 unzip data/nwbwegen.zip -d data/
 ```
 
@@ -707,10 +709,11 @@ ogr2ogr -f GPKG data/nwb.gpkg data/geogegevens/shapefile/nederland_totaal/wegvak
 
 The add a new column `route` to the wegvakken table and set the value to `routeltr+routenr`:
 
-```bash 
+```bash
 ogrinfo data/nwb.gpkg -sql "alter table wegvakken_a add column route TEXT"
 ogrinfo data/nwb.gpkg -sql "update wegvakken_a set route=routeltr||routenr"
 ```
+
 Now you are ready to group the geometries by the newly created `route` attribute and merge geometries of this group:
 
 ```bash
@@ -815,9 +818,9 @@ With a simple modification of the style function the labelling can be made dynam
 var labelPoint = multiLineString.getClosestPoint(getCenter(map.getView().calculateExtent(map.getSize())))
 ```
 
-However this is not an ideal solution either due to the jumping labels on panning and zoomchange by the user. 
+However this is not an ideal solution either due to the jumping labels on panning and zoomchange by the user.
 
-> TODO: This can off course also be solved, but as you may realise labelling is hard a problem. 
+> TODO: This can off course also be solved, but as you may realise labelling is hard a problem.
 
 Since we have the actual vector data loaded in the viewer, it is fairly easy to highlight features that have been clicked. Add the following to `index.js`:
 
@@ -871,16 +874,16 @@ Do not forget to add the new `selectionLayer` to the map. Now when a feature on 
 
 See docs here: https://github.com/PDOK/locatieserver/wiki/API-Locatieserver
 
-
 1. Install autocomplete npm dependency: ` npm install autocompleter`
 2. Remove `popup` html elements from `index.html`
-3. Add css to `index.css`: 
+3. Add css to `index.css`:
 
 ```css
 .ol-zoom.ol-control{
   top: 2em;
 }
 ```
+
 4. Add js:
 
 ```js
@@ -982,7 +985,6 @@ In the promise fulfillment of the `lookup` fetch add after creating the feature 
 vectorSource.clear()
 vectorSource.addFeature(feature)
 ```
-
 
 <a id="markdown-4-referenties" name="4-referenties"></a>
 
