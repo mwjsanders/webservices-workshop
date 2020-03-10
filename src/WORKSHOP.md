@@ -170,7 +170,7 @@ https://www.nationaalgeoregister.nl/geonetwork/srv/dut/csw?request=GetRecords&Se
 
 ### 3.1. Setting up NPM Project with OpenLayers
 
-> TODO: Summary of section. 
+#### 3.1.1 Install dependencies and setup ESLint
 
 First start by modifying your profiles path in the Bash shell, edit the file `~/.profile` and add the following line:
 
@@ -193,7 +193,7 @@ npm install ol
 npm install --save-dev parcel-bundler eslint
 ```
 
-Then setup ESLint by running `eslinit --init` and answer questions with:
+Setting up a linter helps with detecting syntax errors and conforming to a particular style guide. This workshop uses ESLint a JavaScript linter, setup ESLint by running `eslinit --init` and answer questions with:
 
 - How would you like to use ESLint?
     - To check syntax, find problems, and enforce code style
@@ -213,6 +213,20 @@ Then setup ESLint by running `eslinit --init` and answer questions with:
     - JavaScript 
 - Would you like to install them now with npm?
     - y
+
+
+To setup ESLint in VS Code, install the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for VS Code. Then add the following to your VS Code preferences in `settings.json` (through `File>Preferences` then click icon in upper right corner to show the actual JSON): 
+
+```js
+"editor.codeActionsOnSave": {
+  "source.fixAll": true
+},
+"eslint.workingDirectories": [ "./webapp" ]
+```
+
+This will make sure ESLint will run on save and detect the `webapp` directory as a working directory.
+
+#### 3.1.2 Build first webmap with OpenLayers 
 
 Now let's start coding, create the file `index.js` in the folder `webapp` with the following content:
 
@@ -269,7 +283,7 @@ Create the file `index.html` in the folder `webapp` with the following content:
 </html>
 ```
 
-Replace the empty `scripts` element in the `webapp/package.json` file with the following:
+Replace the `scripts` element in the `webapp/package.json` file with the following:
 
 ```json
 "scripts": {
@@ -285,7 +299,7 @@ No run the following command from the `webapp/` directory:
 npm start
 ```
 
-Visit [`http://localhost:1234/`](http://localhost:1234/) to view the results. If correct you should see a interactive map in your browser with the default OpenLayers basemap.
+Visit [`http://localhost:1234/`](http://localhost:1234/) to view the glorious result. If correct you should see a interactive map in your browser with the default OpenLayers basemap.
 
 ![First map!](images/viewer_step1.png "First map!")
 

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>PDOK Webservices Workshop</title>
+  <title></title>
   <style type="text/css">code{white-space: pre;}</style>
   <style type="text/css">
 div.sourceCode { overflow-x: auto; }
@@ -49,9 +49,6 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
   <link href="https://www.pdok.nl/o/iv-pdok-theme/images/favicon.ico" rel="icon" />
 </head>
 <body>
-<div id="header">
-<h1 class="title">PDOK Webservices Workshop</h1>
-</div>
 <!-- TITLE: PDOK Webservices Workshop -->
 <div style="background-color:#1A1E4F;padding:1em; border-radius: 3px;">
 <p><a href="https://pdok.nl"><img src="images/pdok_logo.png" title="PDOK Logo" alt="PDOK Logo" /></a></p>
@@ -161,9 +158,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <h2 id="workshop">3. Workshop</h2>
 <p><a id="markdown-31-setting-up-npm-project-with-openlayers" name="31-setting-up-npm-project-with-openlayers"></a></p>
 <h3 id="setting-up-npm-project-with-openlayers">3.1. Setting up NPM Project with OpenLayers</h3>
-<blockquote>
-<p>TODO: Summary of section.</p>
-</blockquote>
+<h4 id="install-dependencies-and-setup-eslint">3.1.1 Install dependencies and setup ESLint</h4>
 <p>First start by modifying your profiles path in the Bash shell, edit the file <code>~/.profile</code> and add the following line:</p>
 <div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="bu">export</span> <span class="va">PATH=</span>./node_modules/.bin:<span class="va">$PATH</span></code></pre></div>
 <p>Next make sure you load the changes in your profile by sourcing the profile file:</p>
@@ -173,7 +168,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="ex">npm</span> init -y 
 <span class="ex">npm</span> install ol
 <span class="ex">npm</span> install --save-dev parcel-bundler eslint</code></pre></div>
-<p>Then setup ESLint by running <code>eslinit --init</code> and answer questions with:</p>
+<p>Setting up a linter helps with detecting syntax errors and conforming to a particular style guide. This workshop uses ESLint a JavaScript linter, setup ESLint by running <code>eslinit --init</code> and answer questions with:</p>
 <ul>
 <li>How would you like to use ESLint?
 <ul>
@@ -212,6 +207,13 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li>y</li>
 </ul></li>
 </ul>
+<p>To setup ESLint in VS Code, install the <a href="https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint">ESLint extension</a> for VS Code. Then add the following to your VS Code preferences in <code>settings.json</code> (through <code>File&gt;Preferences</code> then click icon in upper right corner to show the actual JSON):</p>
+<div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="st">&quot;editor.codeActionsOnSave&quot;</span><span class="op">:</span> <span class="op">{</span>
+  <span class="st">&quot;source.fixAll&quot;</span><span class="op">:</span> <span class="kw">true</span>
+<span class="op">},</span>
+<span class="st">&quot;eslint.workingDirectories&quot;</span><span class="op">:</span> [ <span class="st">&quot;./webapp&quot;</span> ]</code></pre></div>
+<p>This will make sure ESLint will run on save and detect the <code>webapp</code> directory as a working directory.</p>
+<h4 id="build-first-webmap-with-openlayers">3.1.2 Build first webmap with OpenLayers</h4>
 <p>Now let's start coding, create the file <code>index.js</code> in the folder <code>webapp</code> with the following content:</p>
 <div class="sourceCode"><pre class="sourceCode js"><code class="sourceCode javascript"><span class="im">import</span> <span class="st">&#39;ol/ol.css&#39;</span>
 <span class="im">import</span> <span class="op">{</span> Map<span class="op">,</span> View <span class="op">}</span> <span class="im">from</span> <span class="st">&#39;ol&#39;</span>
@@ -258,7 +260,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">&lt;/body&gt;</span>
 
 <span class="kw">&lt;/html&gt;</span></code></pre></div>
-<p>Replace the empty <code>scripts</code> element in the <code>webapp/package.json</code> file with the following:</p>
+<p>Replace the <code>scripts</code> element in the <code>webapp/package.json</code> file with the following:</p>
 <div class="sourceCode"><pre class="sourceCode json"><code class="sourceCode json"><span class="er">&quot;scripts&quot;:</span> <span class="fu">{</span>
     <span class="dt">&quot;test&quot;</span><span class="fu">:</span> <span class="st">&quot;echo </span><span class="ch">\&quot;</span><span class="st">Error: no test specified</span><span class="ch">\&quot;</span><span class="st"> &amp;&amp; exit 1&quot;</span><span class="fu">,</span>
     <span class="dt">&quot;start&quot;</span><span class="fu">:</span> <span class="st">&quot;parcel index.html&quot;</span><span class="fu">,</span>
@@ -266,7 +268,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="fu">}</span></code></pre></div>
 <p>No run the following command from the <code>webapp/</code> directory:</p>
 <pre><code>npm start</code></pre>
-<p>Visit <a href="http://localhost:1234/"><code>http://localhost:1234/</code></a> to view the results. If correct you should see a interactive map in your browser with the default OpenLayers basemap.</p>
+<p>Visit <a href="http://localhost:1234/"><code>http://localhost:1234/</code></a> to view the glorious result. If correct you should see a interactive map in your browser with the default OpenLayers basemap.</p>
 <div class="figure">
 <img src="images/viewer_step1.png" title="First map!" alt="First map!" />
 <p class="caption">First map!</p>
